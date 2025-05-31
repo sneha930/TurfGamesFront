@@ -1,25 +1,55 @@
-import logo from './logo.svg';
-import './App.css';
+import Body from "./components/Body";
+import Header from "./components/Header";
+import ReactDOM from 'react-dom/client';
+import { Outlet, createBrowserRouter, RouterProvider } from "react-router-dom";
+import Login from "./components/Login";
+import Games from "./components/Games";
+import Players from "./components/Players";
+import GameSlotBooking from "./components/GameSlotBookingForm";
 
-function App() {
+const AppLayout = () => {
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app">
+      <Header />
+      <Outlet />
     </div>
   );
-}
+};
+
+const appRouter = createBrowserRouter([
+  {
+    path: "/",
+    element: <AppLayout />,
+    children: [
+      {
+        path: "/",
+        element: <Body />,
+      },
+      {
+        path: "/login",
+        element: <Login />
+      },
+      {
+        path: "/players",
+        element: < Players />
+      },
+      {
+        path: "/games",
+        element: < Games />
+      },
+      {
+        path: "/gameSlotBookings",
+        element: <GameSlotBooking />
+      }
+    ],
+
+  },
+]);
+
+// ✅ Export a component named App
+const App = () => {
+  return <RouterProvider router={appRouter} />;
+};
 
 export default App;
