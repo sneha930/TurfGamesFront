@@ -1,17 +1,14 @@
-import Body from "./components/Body";
-import Header from "./components/Header";
-import ReactDOM from 'react-dom/client';
 import { Outlet, createBrowserRouter, RouterProvider } from "react-router-dom";
-import Login from "./components/Login";
-import Games from "./components/Games";
-import Players from "./components/Players";
-import GameSlotBooking from "./components/GameSlotBookingForm";
+import Navbar from "./components/Navbar";
+import LandingPage from "./components/LandingPage";
+import SignUpForm from "./components/SignUpForm";
+import SignInForm from "./components/SignInForm";
 
 const AppLayout = () => {
 
   return (
     <div className="app">
-      <Header />
+      <Navbar />
       <Outlet />
     </div>
   );
@@ -23,24 +20,16 @@ const appRouter = createBrowserRouter([
     element: <AppLayout />,
     children: [
       {
-        path: "/",
-        element: <Body />,
+        index: true, 
+        element: <LandingPage />
       },
       {
-        path: "/login",
-        element: <Login />
+        path: "/signup",
+        element: <SignUpForm />
       },
       {
-        path: "/players",
-        element: < Players />
-      },
-      {
-        path: "/games",
-        element: < Games />
-      },
-      {
-        path: "/gameSlotBookings",
-        element: <GameSlotBooking />
+        path: "/signin",
+        element: <SignInForm />
       }
     ],
 
