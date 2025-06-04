@@ -1,7 +1,8 @@
 import { Navigate } from "react-router-dom";
+import { getCurrentUser } from "./utils/auth";
 
 const ProtectedRoute = ({ children, allowedRole }) => {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = getCurrentUser();
 
   if (!user) return <Navigate to="/signin" />;
   if (user.role !== allowedRole) return <Navigate to="/" />;
