@@ -1,70 +1,97 @@
-# Getting Started with Create React App
+1. Modal Component :
+The modal is a reusable component that displays an overlay (a dark background covering the page) and a box with the form inside.
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+It also listens for clicks on a close button or outside the modal box to close the modal by calling onClose (which sets modal to null).
 
-## Available Scripts
+Example modal structure:
 
-In the project directory, you can run:
+function Modal({ children, onClose }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <button onClick={onClose}>Close</button>
+        {children}
+      </div>
+    </div>
+  );
+}
+The outer div (modal-overlay) covers the entire page and darkens the background.
+The inner div (modal-content) contains the form.
+e.stopPropagation() prevents clicks inside the modal box from closing the modal.
+The close button lets the user close the modal.
 
-### `npm start`
+2. Active Link Styling:
+You can highlight the active link (current page) using NavLink from react-router-dom instead of Link. This makes it easier for users to know where they are:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+What is NavLink?
+NavLink is a special version of React Router’s Link component.
+It automatically applies an active state to the link when the current URL matches the link’s path.
+This lets you style the active link differently (e.g., highlight the current page in the navbar).
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+3. ✅ What is useNavigate()?
+useNavigate is a React Router hook that lets you programmatically navigate to a different route (i.e., change pages in your app) after an action happens, like a login or form submission.
 
-### `npm test`
+It's similar to how a user clicks a <Link> or <NavLink>, but used in JavaScript logic, not in JSX.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+✅ In your code:
+const navigate = useNavigate();
+This line gives you access to the navigate function.
 
-### `npm run build`
+Then, inside your handleSubmit, you're doing this:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+if (role === "ADMIN") {
+  navigate("/admin/dashboard");   // ⬅️ Send admin to admin dashboard
+} else if (role === "PLAYER") {
+  navigate("/player/dashboard");  // ⬅️ Send player to player dashboard
+} else {
+  navigate("/");                  // ⬅️ Default fallback
+}
+This changes the URL without refreshing the page, just like how a <Link> works — but dynamically, based on the role you got from the login response.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+✅ Why not use <Link> here?
+Because <Link> is for static navigation in UI, like buttons or navbars.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+But when you log in, you don’t want the user to click something. You want to redirect them automatically after verifying their credentials.
 
-### `npm run eject`
+✅ Simple analogy:
+// 👇 <Link> is like a button you press
+<Link to="/dashboard">Go to dashboard</Link>
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+// 👇 navigate(...) is like pushing the user through the door automatically
+navigate("/dashboard");
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+4. 🔒 Purpose of ProtectedRoute
+It's a wrapper that only allows certain users (based on their role) to access specific routes.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+If:
+the user is not logged in, redirect them to SignIn.
+the user is logged in but has the wrong role, redirect them to Home.
+the user has the right role, show the protected content.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+code:
+const ProtectedRoute = ({ children, allowedRole }) => {}
+You're creating a wrapper component that accepts:
+children: the actual component/page to show (like <AdminDashboard />)
+allowedRole: role allowed to access this route (e.g., "ADMIN" or "PLAYER")
 
-## Learn More
+const user = JSON.parse(localStorage.getItem("user"));
+This retrieves the currently logged-in user from localStorage. You saved it during login like this:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+const user = JSON.parse(localStorage.getItem("user"));
+This retrieves the currently logged-in user from localStorage. You saved it during login like this:
+localStorage.setItem("user", JSON.stringify({ emailId, role }));
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+if (!user) return <Navigate to="/signin" />;
+If the user is not logged in, redirect them to the SignIn page. 🔑
 
-### Code Splitting
+if (user.role !== allowedRole) return <Navigate to="/" />;
+If the user is logged in, but their role doesn't match the role required (e.g., a PLAYER tries to access an admin route), redirect them to the Home page. 🚫
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+return children;
+✅ If the user is logged in and has the right role, show the protected component/page (children).
 
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+🔍 Inside ProtectedRoute:
+const ProtectedRoute = ({ children, allowedRole }) => {
+React automatically gives you:
+allowedRole from the prop you set.
+children is whatever JSX is inside the component — in this case, <AdminDashboard />

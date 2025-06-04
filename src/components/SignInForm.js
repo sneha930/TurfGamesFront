@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const SignInForm = () => {
   const [credentials, setCredentials] = useState({
     emailId: "",
     password: ""
   });
+
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,18 +21,32 @@ const SignInForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // 🔗 Call your Spring Boot login API
+      // Call your Spring Boot login API
       const response = await axios.post("http://localhost:9090/auth/signin", credentials);
 
-      // 🟢 Handle success (e.g., store token or redirect)
+      // Handle success (e.g., store token or redirect)
       console.log("Login success:", response.data);
       alert("Login successful!");
+
+      // Destructure role and emailId from response
+      const { emailId, role } = response.data;
+
+      // Save user data in local storage
+      localStorage.setItem("user", JSON.stringify({ emailId, role }));
+
+      // Redirect based on role
+      if (role === "ADMIN") {
+        navigate("/admin/dashboard");
+      } else if (role === "PLAYER") {
+        navigate("/player/dashboard");
+      } else {
+        navigate("/");
+      }
 
       // Reset form data
       setCredentials({
         emailId: "",
         password: "",
-        role: "PLAYER",
       })
 
       // Navigate or store user info/token if needed
