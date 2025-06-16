@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "./utils/AuthContext";
 
 const SignInForm = () => {
   const [credentials, setCredentials] = useState({
@@ -8,6 +9,7 @@ const SignInForm = () => {
     password: ""
   });
 
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -19,42 +21,40 @@ const SignInForm = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      // Call your Spring Boot login API
-      const response = await axios.post("http://localhost:9090/auth/signin", credentials);
+  e.preventDefault();
+  try {
+    const response = await axios.post("http://localhost:9090/users/signin", credentials);
+    console.log("Login success data from useSignUpResponseDto:", response.data);
+    // alert("Login successful!");
 
-      // Handle success (e.g., store token or redirect)
-      console.log("Login success:", response.data);
-      alert("Login successful!");
+    const userData = response.data;
+    console.log("response after login:", userData);
 
-      // Destructure role and emailId from response
-      const { emailId, role } = response.data;
+    login(userData); // Save to context/localStorage
+    const stored = localStorage.getItem("user");
+    console.log("Stored user in localStorage:", stored);
 
-      // Save user data in local storage
-      localStorage.setItem("user", JSON.stringify({ emailId, role }));
-
-      // Redirect based on role
-      if (role === "ADMIN") {
-        navigate("/admin/dashboard");
-      } else if (role === "PLAYER") {
-        navigate("/player/dashboard");
-      } else {
-        navigate("/");
-      }
-
-      // Reset form data
-      setCredentials({
-        emailId: "",
-        password: "",
-      })
-
-      // Navigate or store user info/token if needed
-    } catch (error) {
-      console.error("Login failed:", error);
-      alert("Invalid credentials");
+    if (userData.role === "ADMIN" || userData.role === "PLAYERADMIN") {
+      console.log("Navigating to:", "/admin/dashboard");
+      navigate("/admin/dashboard");
+    } else if (userData.role === "PLAYER") {
+      console.log("Navigating to:", "/player/dashboard");
+      navigate("/player/dashboard");
+    } else {
+      navigate("/");
     }
-  };
+
+    setCredentials({
+      emailId: "",
+      password: "",
+    });
+
+  } catch (error) {
+    console.error("Login failed:", error);
+    alert("Invalid credentials");
+  }
+};
+
 
   return (
     <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">

@@ -95,3 +95,21 @@ const ProtectedRoute = ({ children, allowedRole }) => {
 React automatically gives you:
 allowedRole from the prop you set.
 children is whatever JSX is inside the component — in this case, <AdminDashboard />
+
+
+5. After logging in or logging out, your Navbar shows the correct UI only after a page refresh.
+
+This happens because:
+
+You're using localStorage.getItem("user") once inside useEffect().
+
+But localStorage doesn't trigger re-renders when its value changes.
+
+So when login/logout changes the user data, the Navbar doesn't automatically update.
+
+✅ Solution: Use global state to sync login/logout instantly.
+There are 2 common ways:
+
+Option 1: 🟩 Use useState + useEffect + custom event (simple & quick)
+Option 2: 🟪 Use a global context (AuthContext) (best for larger apps)
+Since your app is growing, let's go with Option 2 (recommended) — AuthContext.

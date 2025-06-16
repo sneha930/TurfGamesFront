@@ -7,7 +7,7 @@ const PlayerTable = () => {
   const[selectedPlayer, setSelectedPlayer] = useState(null); // for modal
 
   useEffect(() => {
-    const response = axios.get("http://localhost:9090/players")
+    const response = axios.get("http://localhost:9090/users/get_users_by_role")
       .then(response => {
         setPlayers(response.data)
         console.log(response.data);

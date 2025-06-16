@@ -1,10 +1,11 @@
-import React from 'react'
 import axios from 'axios';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const CreateSlotForm = () => {
     const [games, setGames] = useState([]);
     const [allTurfSizes, setAllTurfSizes] = useState([]);
+    const navigate = useNavigate();
   
     const [game, setGame] = useState('');
     const [turfSize, setTurfSize] = useState('');
@@ -52,6 +53,8 @@ const CreateSlotForm = () => {
       setEndTime('');
       setDate('');
       setTurfSizeId('');
+
+      navigate("/admin/dashboard/slots")
   
       } catch(error) {
         console.log("Error booking slot", error);

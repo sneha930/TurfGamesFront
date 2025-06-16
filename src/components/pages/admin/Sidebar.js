@@ -9,8 +9,8 @@ const Sidebar = () => {
          <li><NavLink to="players" className="hover:underline">Players</NavLink></li>
          <li><NavLink to="games" className="hover:underline">Games</NavLink></li>
          <li><NavLink to="slots" className="hover:underline">Slots</NavLink></li>
-         <li><NavLink to="bookings" className="hover:underline">Bookings</NavLink></li>
-         <li><NavLink to="create-slot" className="hover:underline">Create Slot</NavLink></li>
+         <li><NavLink to="turfs" className="hover:underline">Turfs</NavLink></li>
+         <li><NavLink to="bookslot" className="hover:underline">Join Game</NavLink></li>
       </ul>
     </div>
   )

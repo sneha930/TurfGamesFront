@@ -28,7 +28,7 @@ const GameTable = () => {
             <tr className="bg-gray-100 text-left">
               <th className="py-2 px-4 border">Game Name</th>
               <th className="py-2 px-4 border">Description</th>
-              <th className="py-2 px-4 border">Actions</th>
+              {/* <th className="py-2 px-4 border">Actions</th> */}
             </tr>
           </thead>
           <tbody>
@@ -36,14 +36,14 @@ const GameTable = () => {
               <tr key={game.id} className="hover:bg-gray-50">
                 <td className="py-2 px-4 border">{game.name}</td>
                 <td className="py-2 px-4 border">{game.description}</td>
-                <td className="py-2 px-4 border">
+                {/* <td className="py-2 px-4 border">
                   <button
                     onClick={() => setSelectedGame(game)}
                     className="text-blue-600 hover:underline"
                   >
                     View Slots
                   </button>
-                </td>
+                </td> */}
               </tr>
             ))}
           </tbody>

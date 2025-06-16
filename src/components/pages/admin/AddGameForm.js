@@ -1,11 +1,46 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { getCurrentUser } from "../../utils/auth";
+import { useNavigate } from "react-router-dom";
 
 const AddGameForm = () => {
+  const user = getCurrentUser();
+  console.log("Current User from localStorage:", user);
+  const [userId, setUserId] = useState(null);
+  const navigate = useNavigate();
+
   const [gameData, setGameData] = useState({
     name: "",
     description: "",
+    minPlayers: "",
+    maxPlayers: "",
+    createdBy: {id: null }
   });
+
+  useEffect(() => {
+  const fetchUser = async () => {
+    console.log("Inside useEffect");
+    if (user?.emailId) {
+      try {
+        const response = await axios.get(`http://localhost:9090/users/get_user_by_emailid/${user.emailId}`);
+        console.log("Calling GET with emailId:", user.emailId);
+        console.log("Fetched user data from backend:", response.data);
+        const id = response.data.id;
+        setUserId(id);
+        console.log("Fetched userId from backend:", id);
+
+        setGameData((prev) => ({
+          ...prev,
+          createdBy: { id },
+
+        }));
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    }
+  };
+  fetchUser();
+}, [user?.emailId]);
 
   const [message, setMessage] = useState("");
 
@@ -17,14 +52,26 @@ const AddGameForm = () => {
     e.preventDefault();
 
     try {
-      await axios.post("http://localhost:9090/games", gameData); // adjust URL if needed
+      await axios.post("http://localhost:9090/games", gameData); 
       setMessage("Game added successfully!");
-      setGameData({ name: "", description: "" }); // reset form
+      
+      setGameData({
+        name: "",
+        description: "",
+        minPlayers: "",
+        maxPlayers: "",
+        createdBy: { id: userId },
+      });
+
+      navigate("/admin/dashboard/games");
+
     } catch (error) {
       console.error("Error adding game:", error);
       setMessage("Something went wrong. Try again!");
     }
   };
+
+   console.log("userId during render:", userId);
 
   return (
     <div className="max-w-md mx-auto mt-10 bg-white shadow-lg rounded-xl p-6">
@@ -56,11 +103,38 @@ const AddGameForm = () => {
           />
         </div>
 
+        <div>
+          <label className="block mb-1 font-medium">Minimum Required Players</label>
+          <input
+            name="minPlayers"
+            value={gameData.minPlayers}
+            onChange={handleChange}
+            required
+            className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:border-blue-300"
+          />
+        </div>
+
+        <div>
+          <label className="block mb-1 font-medium">Maximum Required Players</label>
+          <input
+            name="maxPlayers"
+            value={gameData.maxPlayers}
+            onChange={handleChange}
+            required
+            className="w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring focus:border-blue-300"
+          />
+        </div>
+
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
+          disabled={!userId}
+          className={`w-full py-2 px-4 rounded-md transition ${
+            userId
+              ? "bg-blue-600 text-white hover:bg-blue-700"
+              : "bg-gray-400 text-gray-700 cursor-not-allowed"
+          }`}
         >
-          Add Game
+          {userId ? "Add Game" : "Loading..."}
         </button>
       </form>
     </div>

@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const SlotTable = () => {
   const [slots, setSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios.get("http://localhost:9090/gameslot")  // Adjust API endpoint as needed
@@ -15,7 +17,10 @@ const SlotTable = () => {
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-md relative">
-      <h2 className="text-2xl font-semibold mb-4">Slots</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-2xl font-semibold mb-4">Slots</h2>
+        <button onClick={() => navigate("/admin/dashboard/create-slot")} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Create Slot</button>
+      </div>
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm border">
           <thead>

@@ -1,14 +1,18 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const SignUpForm = () => {
+
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     emailId: "",
     password: "",
-    role: "PLAYER",
+    role: "",
     name: "",
     dob: "",
-    address: {
+    addressDto: {
       line1: "",
       line2: "",
       city: "",
@@ -16,7 +20,7 @@ const SignUpForm = () => {
       country: "",
       pincode: ""
     },
-    contact: {
+    contactDto: {
       primaryContact: "",
       homeContact: "",
       emergencyContact: ""
@@ -24,19 +28,22 @@ const SignUpForm = () => {
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value } = e.target;  // Get field name and value
 
-    if (name.startsWith("address.")) {
-      const field = name.split(".")[1];
+    // Check if it's an address field like "address.city"
+    if (name.startsWith("addressDto.")) {
+      const field = name.split(".")[1]; // Extracts "city" from "address.city"
       setFormData((prev) => ({
-        ...prev,
-        address: { ...prev.address, [field]: value }
+        ...prev, // copy everything else
+        addressDto: { ...prev.addressDto,  // copy existing address fields
+          [field]: value // update only that one field (e.g., city)
+        }
       }));
-    } else if (name.startsWith("contact.")) {
+    } else if (name.startsWith("contactDto.")) {
       const field = name.split(".")[1];
       setFormData((prev) => ({
         ...prev,
-        contact: { ...prev.contact, [field]: value }
+        contactDto: { ...prev.contactDto, [field]: value }
       }));
     } else {
       setFormData((prev) => ({
@@ -48,10 +55,21 @@ const SignUpForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Determine if isPlayer should be true
+    const isPlayerFlag = formData.role === "PLAYER" || formData.role === "PLAYERADMIN";
+
+    const dataToSend = {
+    ...formData,
+    isPlayer: isPlayerFlag
+  };
+
     try {
       // Replace with your API endpoint
-      await axios.post("http://localhost:9090/auth/signup", formData);
+      console.log("Submitting:", formData);
+      await axios.post("http://localhost:9090/users/signup", dataToSend);
       alert("User registered successfully!");
+      navigate("/signin")
 
       // Reset form fields
       setFormData({
@@ -60,7 +78,7 @@ const SignUpForm = () => {
         role: "PLAYER",
         name: "",
         dob: "",
-        address: {
+        addressDto: {
           line1: "",
           line2: "",
           city: "",
@@ -68,7 +86,7 @@ const SignUpForm = () => {
           country: "",
           pincode: ""
         },
-        contact: {
+        contactDto: {
           primaryContact: "",
           homeContact: "",
           emergencyContact: ""
@@ -114,12 +132,14 @@ const SignUpForm = () => {
           value={formData.role}
           onChange={handleChange}
           className="w-full p-2 border rounded"
+          required
         >
+          <option value="" disabled hidden>Select Role</option> {/* placeholder */}
           <option value="PLAYER">Player</option>
           <option value="ADMIN">Admin</option>
+          <option value="PLAYERADMIN">Player+Admin</option>
         </select>
 
-        {formData.role === "PLAYER" && (
         <>
         {/* Name */}
         <input
@@ -145,49 +165,49 @@ const SignUpForm = () => {
         <h3 className="font-semibold mt-4">Address</h3>
         <input
           type="text"
-          name="address.line1"
+          name="addressDto.line1"
           placeholder="Line 1"
-          value={formData.address.line1}
+          value={formData.addressDto.line1}
           onChange={handleChange}
           className="w-full p-2 border rounded"
         />
         <input
           type="text"
-          name="address.line2"
+          name="addressDto.line2"
           placeholder="Line 2"
-          value={formData.address.line2}
+          value={formData.addressDto.line2}
           onChange={handleChange}
           className="w-full p-2 border rounded"
         />
         <input
           type="text"
-          name="address.city"
+          name="addressDto.city"
           placeholder="City"
-          value={formData.address.city}
+          value={formData.addressDto.city}
           onChange={handleChange}
           className="w-full p-2 border rounded"
         />
         <input
           type="text"
-          name="address.state"
+          name="addressDto.state"
           placeholder="State"
-          value={formData.address.state}
+          value={formData.addressDto.state}
           onChange={handleChange}
           className="w-full p-2 border rounded"
         />
         <input
           type="text"
-          name="address.country"
+          name="addressDto.country"
           placeholder="Country"
-          value={formData.address.country}
+          value={formData.addressDto.country}
           onChange={handleChange}
           className="w-full p-2 border rounded"
         />
         <input
           type="text"
-          name="address.pincode"
+          name="addressDto.pincode"
           placeholder="Pincode"
-          value={formData.address.pincode}
+          value={formData.addressDto.pincode}
           onChange={handleChange}
           className="w-full p-2 border rounded"
         />
@@ -195,30 +215,29 @@ const SignUpForm = () => {
         <h3 className="font-semibold mt-4">Contact</h3>
         <input
           type="text"
-          name="contact.primaryContact"
+          name="contactDto.primaryContact"
           placeholder="Primary Contact"
-          value={formData.contact.primaryContact}
+          value={formData.contactDto.primaryContact}
           onChange={handleChange}
           className="w-full p-2 border rounded"
         />
         <input
           type="text"
-          name="contact.homeContact"
+          name="contactDto.homeContact"
           placeholder="Home Contact"
-          value={formData.contact.homeContact}
+          value={formData.contactDto.homeContact}
           onChange={handleChange}
           className="w-full p-2 border rounded"
         />
         <input
           type="text"
-          name="contact.emergencyContact"
+          name="contactDto.emergencyContact"
           placeholder="Emergency Contact"
-          value={formData.contact.emergencyContact}
+          value={formData.contactDto.emergencyContact}
           onChange={handleChange}
           className="w-full p-2 border rounded"
         />
         </>
-        )}
 
         <button
           type="submit"
