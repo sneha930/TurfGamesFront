@@ -10,7 +10,9 @@ const PlayerTable = () => {
     const response = axios.get("http://localhost:9090/users/get_users_by_role")
       .then(response => {
         setPlayers(response.data)
-        console.log(response.data);
+        console.log("Response from API:", response.data);
+        console.log("type: ",typeof response.data, Array.isArray(response.data), response.data);
+
       })
       .catch(error => console.error("Failed to fetch players", error));
   }, []);
@@ -31,8 +33,7 @@ const PlayerTable = () => {
             </tr>
           </thead>
           <tbody>
-            {console.log(players)}
-            {players.map((player) => (
+            {Array.isArray(players) && players.map((player) => (
               <tr key={player.id} className="hover:bg-gray-50">
                 <td className="py-2 px-4 border">{player.name}</td>
                 <td className="py-2 px-4 border">{player.dob}</td>
@@ -64,6 +65,16 @@ const PlayerTable = () => {
             <h3 className="text-xl font-semibold mb-4">Player Details</h3>
             <div className="text-sm space-y-2">
               <p><strong>Name:</strong> {selectedPlayer.name}</p>
+              <p><strong>Favourite Games:</strong> {(selectedPlayer.favouriteGameDtos || []).length > 0 ? (
+              <ul className="list-disc pl-5">
+                {selectedPlayer.favouriteGameDtos.map((favgame) => (
+                  <li key={favgame.id}>{favgame.name}</li>
+                ))}
+              </ul>
+                ) : (
+                  <p className="text-gray-500">No favourite games added</p>
+                )}
+              </p>
               <p><strong>DOB:</strong> {selectedPlayer.dob}</p>
               <p><strong>Primary Contact:</strong> {selectedPlayer.contact?.primaryContact}</p>
               <p><strong>Home Contact:</strong> {selectedPlayer.contact?.homeContact}</p>

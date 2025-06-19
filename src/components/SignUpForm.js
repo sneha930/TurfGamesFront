@@ -1,10 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const SignUpForm = () => {
 
   const navigate = useNavigate();
+  const[gameList, setGameList] = useState([]);
+
+  useEffect(() => {
+    axios.get("http://localhost:9090/games")
+    .then(res => setGameList(res.data))
+    .catch(err => console.log("GameListFetch failed: ", err));
+  }, [])
 
   const [formData, setFormData] = useState({
     emailId: "",
@@ -12,6 +19,7 @@ const SignUpForm = () => {
     role: "",
     name: "",
     dob: "",
+    favouriteGameDtos: [],
     addressDto: {
       line1: "",
       line2: "",
@@ -28,11 +36,11 @@ const SignUpForm = () => {
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;  // Get field name and value
+    const { name, value} = e.target;  // Get field name and value
 
     // Check if it's an address field like "address.city"
     if (name.startsWith("addressDto.")) {
-      const field = name.split(".")[1]; // Extracts "city" from "address.city"
+      const field = name.split(".")[1]; // Extracts "city" from "addressDto.city"
       setFormData((prev) => ({
         ...prev, // copy everything else
         addressDto: { ...prev.addressDto,  // copy existing address fields
@@ -53,6 +61,51 @@ const SignUpForm = () => {
     }
   };
 
+  const handleCheckboxChange = (e, game) => {
+    // If a checkbox is checked, the game is added to favouriteGameDtos.
+    // If unchecked, it filters that game out.true → checkbox is checked (user selected it), false → checkbox is unchecked (user deselected it)
+     
+    // Destructures the checked value from the checkbox that triggered the event.
+  const { checked } = e.target;
+
+  // Since form data depends on previous state, you use functional form of setState.
+  // prevFormData is the latest snapshot of formData.
+  setFormData((prevFormData) => {
+    // Clones the current list of selected games (so original state isn't directly mutated).
+    // This is necessary for safe React state updates.
+    const currentGames = [...prevFormData.favouriteGameDtos];
+
+    // First check if the game is not already in the list.
+    // If it’s not in, push the game object to the list.
+    // This prevents duplicates in the selection.
+    if (checked) {
+      // Add game object if not already present
+      if (!currentGames.find((g) => g.id === game.id)) {
+        currentGames.push(game);
+      }
+
+      // filter() removes the game whose ID matches the current one.
+      // Returns a new updated formData with that game removed.
+      // 💡 Why use return here?
+      // When unchecked, we return early with the updated favouriteGameDtos.
+    } else {
+      // Remove game object by ID
+      const updatedGames = currentGames.filter((g) => g.id !== game.id);
+      return {
+        ...prevFormData,
+        favouriteGameDtos: updatedGames,
+      };
+    }
+
+    // This is for the "checked" case.
+    // After possibly adding the game, we return the new form data with the updated game list.
+    return {
+      ...prevFormData,
+      favouriteGameDtos: currentGames,
+    };
+  });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -67,7 +120,8 @@ const SignUpForm = () => {
     try {
       // Replace with your API endpoint
       console.log("Submitting:", formData);
-      await axios.post("http://localhost:9090/users/signup", dataToSend);
+      const response = await axios.post("http://localhost:9090/users/signup", dataToSend);
+      console.log("Signup Success Response: ", response.data);
       alert("User registered successfully!");
       navigate("/signin")
 
@@ -78,6 +132,7 @@ const SignUpForm = () => {
         role: "PLAYER",
         name: "",
         dob: "",
+        favouriteGameDtos: [],
         addressDto: {
           line1: "",
           line2: "",
@@ -237,7 +292,24 @@ const SignUpForm = () => {
           onChange={handleChange}
           className="w-full p-2 border rounded"
         />
+        {(formData.role === "PLAYER" || formData.role === "PLAYERADMIN") && (
+        <>
+        <label className="block mb-1 font-medium">Select Favourite Games</label>
+        {gameList.map((game) => (
+          <div key={game.id} className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id={game.id}
+              checked={formData.favouriteGameDtos.some((g) => g.id === game.id)}
+              onChange={(e) => handleCheckboxChange(e, game)}
+            />
+            <label htmlFor={game.id}>{game.name}</label>
+          </div>
+        ))}
         </>
+      )}
+
+      </>
 
         <button
           type="submit"

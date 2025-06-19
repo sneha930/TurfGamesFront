@@ -41,7 +41,7 @@ const CreateSlotForm = () => {
       }
   
       try {
-        const response = await axios.post("http://localhost:9090/gameslot", bookingData);
+        const response = await axios.post("http://localhost:9090/gameslot/create_slot", bookingData);
         console.log("Booking successful:", response.data);
         alert("Game slot created successfully");
   
@@ -58,7 +58,7 @@ const CreateSlotForm = () => {
   
       } catch(error) {
         console.log("Error booking slot", error);
-        alert("Failed to book slot, please try again");
+        alert("Failed to create slot, please try again");
       }
     }
   
