@@ -1,20 +1,29 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
+import { resolvePath } from 'react-router-dom';
 
 const PlayerTable = () => {
 
   const[players, setPlayers] = useState([]);
   const[selectedPlayer, setSelectedPlayer] = useState(null); // for modal
+  const[loading, setLoading] = useState(true);
+
+  // fetch players
+  const fetchPlayers = async() => {
+    try {
+      const response = await axios.get("http://localhost:9090/users/users/by_roles?roles=PLAYER,PLAYERADMIN");
+      setPlayers(response.data);
+      console.log("Response from API:", response.data);
+      console.log("type: ",typeof response.data, Array.isArray(response.data), response.data);
+    } catch(error) {
+      console.log("Failed to fetch players", error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
-    const response = axios.get("http://localhost:9090/users/get_users_by_role")
-      .then(response => {
-        setPlayers(response.data)
-        console.log("Response from API:", response.data);
-        console.log("type: ",typeof response.data, Array.isArray(response.data), response.data);
-
-      })
-      .catch(error => console.error("Failed to fetch players", error));
+    fetchPlayers();
   }, []);
 
   const closeModal = () => setSelectedPlayer(null);
@@ -22,7 +31,13 @@ const PlayerTable = () => {
   return (
     <div className="bg-white p-6 rounded-xl shadow-md relative">
       <h2 className="text-2xl font-semibold mb-4">Registered Players</h2>
-      <div className="overflow-x-auto">
+      
+      {loading ? (
+        <p className='text-gray-600'>Loading Players...</p>
+      ): players.length === 0 ? (
+        <p>No Players found</p>
+      ) : (
+        <div className="overflow-x-auto">
         <table className="min-w-full text-sm border">
           <thead>
             <tr className="bg-gray-100 text-left">
@@ -51,8 +66,9 @@ const PlayerTable = () => {
           </tbody>
         </table>
       </div>
+      )}
 
-      {/* Modal */}
+      {/* Player Details Modal */}
       {selectedPlayer && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
           <div className="bg-white rounded-xl p-6 shadow-lg w-[90%] max-w-lg relative">

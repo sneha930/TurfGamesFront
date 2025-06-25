@@ -1,11 +1,7 @@
 import { Outlet, createBrowserRouter, RouterProvider } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import LandingPage from "./components/LandingPage";
-import SignUpForm from "./components/SignUpForm";
-import SignInForm from "./components/SignInForm";
 import ProtectedRoute from "./components/ProtectedRoute";
-import AdminDashboard from "./components/pages/admin/AdminDashboard";
-import PlayerDashboard from "./components/pages/player/PlayerDashboard";
+import DashboardLayout from "./components/pages/admin/DashboardLayout";
 import NotFound from "./components/NotFound";
 import PlayerTable from "./components/pages/admin/PlayerTable";
 import SlotTable from "./components/pages/admin/SlotTable";
@@ -15,20 +11,27 @@ import AddGameForm from "./components/pages/admin/AddGameForm";
 import AddTurfForm from "./components/pages/admin/AddTurfForm";
 import TurfTable from "./components/pages/admin/TurfTable";
 import BookSlotForm from "./components/pages/admin/BookSlotForm";
+import React, { Suspense } from "react";
+import { Spinner } from "./components/Spinner";
+
+const SignUpForm = React.lazy(() => import("./components/SignUpForm"))
+const LandingPage = React.lazy(() => import("./components/LandingPage"));
+const SignInForm = React.lazy(() => import("./components/SignInForm"));
 
 
 // This acts as a layout wrapper.
 // It displays the <Navbar /> on all pages.
 // <Outlet /> is a placeholder for child components (like landing, sign in, etc.) based on the current route
+// Now, any lazy-loaded child component of AppLayout will load smoothly with a spinner. 
 const AppLayout = () => {
-
   return (
     <div className="app">
       <Navbar />
-      <Outlet />
+      <Suspense fallback={<Spinner />}>
+        <Outlet />
+      </Suspense>
     </div>
   );
-
 };
 
 
@@ -41,25 +44,42 @@ const appRouter = createBrowserRouter([
       // Public Routes: These are open to everyone.
       {
         index: true, 
-        element: <LandingPage />
+        element: (
+          <Suspense fallback={<Spinner/>}>
+            <LandingPage />
+          </Suspense>
+        )
       },
       {
         path: "/signup",
-        element: <SignUpForm />
+        element: (
+          <Suspense fallback={<Spinner />}>
+            <SignUpForm />
+          </Suspense>
+        )
       },
       {
         path: "/signin",
-        element: <SignInForm />
+        element: (
+          <Suspense fallback={<Spinner />}>
+            <SignInForm />
+          </Suspense>
+        )
       },
 
       // PLAYER DASHBOARD
       // Protected Route for Player Dashboard
       {
         path: "player/dashboard",
-        element: 
+        element: (
         <ProtectedRoute allowedRole={"PLAYER"}>
-          <PlayerDashboard />
+          <DashboardLayout />
         </ProtectedRoute>
+        ),
+        children  : [
+          { path: "slots", element: <SlotTable /> },
+          { path: "bookslot", element: <BookSlotForm />},
+        ]
       },
 
       // ADMIN DASHBOARD - Parent Route
@@ -68,10 +88,11 @@ const appRouter = createBrowserRouter([
         path: "admin/dashboard",
         element: (
         <ProtectedRoute allowedRole={["ADMIN", "PLAYERADMIN"]}>
-          <AdminDashboard />
+          <DashboardLayout />
         </ProtectedRoute>
         ), 
         children : [
+          { index:true, element: <PlayerTable /> },
           { path: "players", element: <PlayerTable /> },
           { path: "games", element: <GameTable /> },
           { path: "slots", element: <SlotTable /> },
@@ -79,7 +100,8 @@ const appRouter = createBrowserRouter([
           { path: "add-game", element: <AddGameForm />},
           { path: "turfs", element: <TurfTable />},
           { path: "add-turf", element: <AddTurfForm />},
-          { path: "bookslot", element: <BookSlotForm />}
+          { path: "bookslot", element: <BookSlotForm />},
+          { path: "*", element: <NotFound />}
         ]
       },
 

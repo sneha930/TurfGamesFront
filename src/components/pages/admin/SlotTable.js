@@ -1,15 +1,22 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { getCurrentUser } from "../../utils/auth";
 
 const SlotTable = () => {
   const [slots, setSlots] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const navigate = useNavigate();
 
+  const role = getCurrentUser()?.role;
+  // console.log(role);
+
   useEffect(() => {
-    axios.get("http://localhost:9090/gameslot")  // Adjust API endpoint as needed
-      .then(response => setSlots(response.data))
+    axios.get("http://localhost:9090/gameslot")
+      .then(response => {
+        setSlots(response.data);
+        console.log("Fetched Game Slots:", response.data);
+      })
       .catch(error => console.error("Failed to fetch slots", error));
   }, []);
 
@@ -19,24 +26,32 @@ const SlotTable = () => {
     <div className="bg-white p-6 rounded-xl shadow-md relative">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-semibold mb-4">Slots</h2>
-        <button onClick={() => navigate("/admin/dashboard/create-slot")} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">Create Slot</button>
+        {role !== "PLAYER" && <button
+          onClick={() => navigate("/admin/dashboard/create-slot")}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+        >
+          Create Slot
+        </button>}
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm border">
           <thead>
             <tr className="bg-gray-100 text-left">
+              <th className="py-2 px-4 border">Game Name</th>
               <th className="py-2 px-4 border">Slot Name</th>
               <th className="py-2 px-4 border">Time</th>
               <th className="py-2 px-4 border">Turf Name</th>
               <th className="py-2 px-4 border">Turf Size</th>
               <th className="py-2 px-4 border">Capacity</th>
               <th className="py-2 px-4 border">Booked</th>
+              <th className="py-2 px-4 border">Participants</th>
               <th className="py-2 px-4 border">Actions</th>
             </tr>
           </thead>
           <tbody>
             {slots.map((slot) => (
               <tr key={slot.id} className="hover:bg-gray-50">
+                <td className="py-2 px-4 border">{slot?.game?.name}</td>
                 <td className="py-2 px-4 border">{slot.slotName}</td>
                 <td className="py-2 px-4 border">{slot.startTime} - {slot.endTime}</td>
                 <td className="py-2 px-4 border">{slot?.turfSizeDto?.turf?.name}</td>
@@ -47,6 +62,17 @@ const SlotTable = () => {
                     <span className="text-red-600 font-semibold">Yes</span>
                   ) : (
                     <span className="text-green-600 font-semibold">No</span>
+                  )}
+                </td>
+                <td className="py-2 px-4 border">
+                  {(slot.playerDtos && slot.playerDtos.length > 0) ? (
+                    <ul className="list-disc pl-4">
+                      {slot.playerDtos.map(player => (
+                        <li key={player.id}>{player?.userSignUpResponseDto?.name || "Unknown"}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span className="text-gray-500">No players</span>
                   )}
                 </td>
                 <td className="py-2 px-4 border">
@@ -85,7 +111,20 @@ const SlotTable = () => {
                 <span className="text-green-600 font-semibold">No</span>
               )}
             </p>
-            {/* You can add more slot details here if needed */}
+            <div className="mt-4">
+              <strong>Participants:</strong>
+              {(selectedSlot.playerDtos && selectedSlot.playerDtos.length > 0) ? (
+                <ul className="list-disc pl-6 mt-2">
+                  {selectedSlot.playerDtos.map(player => (
+                    <li key={player.id}>
+                      {player.userSignUpResponseDto?.name || "Unknown Player"}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500">No players booked this slot.</p>
+              )}
+            </div>
           </div>
         </div>
       )}
