@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
 const AddTurfForm = () => {
@@ -30,7 +30,7 @@ const AddTurfForm = () => {
     const turfData = { name, address, description, turfSize };
 
     try {
-      const response = await axios.post("http://localhost:9090/turf", turfData);
+      const response = await api.post("/turf/create_turf", turfData);
       alert("Turf created successfully!");
       navigate("/admin/dashboard/turfs");
     } catch (error) {

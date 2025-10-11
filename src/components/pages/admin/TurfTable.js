@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
 const TurfTable = () => {
@@ -8,7 +8,7 @@ const TurfTable = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get("http://localhost:9090/turf") // Update your API if needed
+    api.get("turf/get_all_turfs") // Update your API if needed
       .then((response) => {
         setTurfs(response.data);
       })

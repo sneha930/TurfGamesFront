@@ -22,22 +22,26 @@ const AddGameForm = () => {
     console.log("Inside useEffect");
     if (user?.emailId) {
       try {
-        const response = await axios.get(`http://localhost:9090/users/get_user_by_emailid/${user.emailId}`);
-        console.log("Calling GET with emailId:", user.emailId);
-        console.log("Fetched user data from backend:", response.data);
-        const id = response.data.id;
-        setUserId(id);
-        console.log("Fetched userId from backend:", id);
+      // ✅ Define token inside the function
+      const token = localStorage.getItem("token");
 
-        setGameData((prev) => ({
-          ...prev,
-          createdBy: { id },
+      const response = await axios.get(
+        `http://localhost:9090/users/get_user_by_emailid/${user.emailId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}` // use token here
+          }
+        }
+      );
 
-        }));
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      }
+      const id = response.data.id;
+      setUserId(id);
+      setGameData(prev => ({ ...prev, createdBy: { id } }));
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      setMessage("Failed to fetch user info. Try logging in again.");
     }
+    };
   };
   fetchUser();
 }, [user?.emailId]);
@@ -52,24 +56,32 @@ const AddGameForm = () => {
     e.preventDefault();
 
     try {
-      await axios.post("http://localhost:9090/games", gameData); 
-      setMessage("Game added successfully!");
-      
-      setGameData({
-        name: "",
-        description: "",
-        minPlayers: "",
-        maxPlayers: "",
-        createdBy: { id: userId },
-      });
+    // ✅ Define token here as well
+    const token = localStorage.getItem("token");
 
-      navigate("/admin/dashboard/games");
+    await axios.post(
+      "http://localhost:9090/games/create_game",
+      gameData,
+      {
+        headers: { Authorization: `Bearer ${token}` } // use token here
+      }
+    );
 
-    } catch (error) {
-      console.error("Error adding game:", error);
-      setMessage("Something went wrong. Try again!");
-    }
-  };
+    setMessage("Game added successfully!");
+    setGameData({
+      name: "",
+      description: "",
+      minPlayers: "",
+      maxPlayers: "",
+      createdBy: { id: userId }
+    });
+
+    navigate("/admin/dashboard/games");
+  } catch (error) {
+    console.error("Error adding game:", error);
+    setMessage("Something went wrong. Try again!");
+  }
+};
 
    console.log("userId during render:", userId);
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser } from "../../utils/auth";
 
@@ -12,7 +12,7 @@ const SlotTable = () => {
   // console.log(role);
 
   useEffect(() => {
-    axios.get("http://localhost:9090/gameslot")
+    api.get("/gameslot/get_all_game_slots")
       .then(response => {
         setSlots(response.data);
         console.log("Fetched Game Slots:", response.data);
@@ -113,6 +113,7 @@ const SlotTable = () => {
             </p>
             <div className="mt-4">
               <strong>Participants:</strong>
+              console.log("Fetched Game Slots:", response.data);
               {(selectedSlot.playerDtos && selectedSlot.playerDtos.length > 0) ? (
                 <ul className="list-disc pl-6 mt-2">
                   {selectedSlot.playerDtos.map(player => (

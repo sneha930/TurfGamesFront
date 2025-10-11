@@ -1,6 +1,6 @@
-import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../../../api/axiosInstance';
 
 const CreateSlotForm = () => {
     const [games, setGames] = useState([]);
@@ -41,7 +41,7 @@ const CreateSlotForm = () => {
       }
   
       try {
-        const response = await axios.post("http://localhost:9090/gameslot/create_slot", bookingData);
+        const response = await api.post("/gameslot/create_slot", bookingData);
         console.log("Booking successful:", response.data);
         alert("Game slot created successfully");
   
@@ -64,7 +64,7 @@ const CreateSlotForm = () => {
   
     // Fetch game list from Spring Boot backend
     useEffect(() => {
-     axios.get("http://localhost:9090/games")
+     api.get("/games/get_all_games")
      .then((response) => {
         setGames(response.data)
         console.log(response.data);
@@ -73,7 +73,7 @@ const CreateSlotForm = () => {
         console.log("Error fetching games", error);
      })
   
-     axios.get("http://localhost:9090/turf")
+     api.get("/turf/get_all_turfs")
      .then((response) => {
         setAllTurfSizes(response.data);
         

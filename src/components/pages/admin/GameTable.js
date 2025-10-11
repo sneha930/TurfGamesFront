@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../../api/axiosInstance"
 import { useNavigate } from "react-router-dom";
 
 const GameTable = () => {
@@ -9,9 +9,9 @@ const GameTable = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get("http://localhost:9090/games")
-      .then(response => setGames(response.data))
-      .catch(error => console.error("Failed to fetch games", error));
+    api.get("/games/get_all_games")
+    .then(response => setGames(response.data))
+    .catch(error => console.error("Failed to fetch games", error));
   }, []);
 
   const closeModal = () => setSelectedGame(null);

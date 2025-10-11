@@ -1,12 +1,14 @@
 import React, { useState } from "react";
-import axios from "axios";
+import api from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./utils/AuthContext";
+
+console.log("api:", api);
 
 const SignInForm = () => {
   const [credentials, setCredentials] = useState({
     emailId: "",
-    password: ""
+    password: "",
   });
 
   const { login } = useAuth();
@@ -16,39 +18,32 @@ const SignInForm = () => {
     const { name, value } = e.target;
     setCredentials((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e) => {
   e.preventDefault();
   try {
-    const response = await axios.post("http://localhost:9090/users/signin", credentials);
-    console.log("Login success data from useSignUpResponseDto:", response.data);
-    // alert("Login successful!");
+    const response = await api.post("/users/signin", credentials);
+    console.log("Login success:", response.data);
 
-    const userData = response.data;
-    console.log("response after login:", userData);
+    const { token, user } = response.data;
 
-    login(userData); // Save to context/localStorage
-    const stored = localStorage.getItem("user");
-    console.log("Stored user in localStorage:", stored);
+    // Save token + user in context/localStorage
+    login({ token, user });
 
-    if (userData.role === "ADMIN" || userData.role === "PLAYERADMIN") {
-      console.log("Navigating to:", "/admin/dashboard");
+    const role = user.role?.replace("ROLE_", ""); // Normalize role
+
+    if (role === "ADMIN" || role === "PLAYERADMIN") {
       navigate("/admin/dashboard");
-    } else if (userData.role === "PLAYER") {
-      console.log("Navigating to:", "/player/dashboard");
+    } else if (role === "PLAYER") {
       navigate("/player/dashboard");
     } else {
       navigate("/");
     }
 
-    setCredentials({
-      emailId: "",
-      password: "",
-    });
-
+    setCredentials({ emailId: "", password: "" });
   } catch (error) {
     console.error("Login failed:", error);
     alert("Invalid credentials");
@@ -60,7 +55,6 @@ const SignInForm = () => {
     <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
       <h2 className="text-2xl font-bold mb-6 text-center">Sign In</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-
         <input
           type="email"
           name="emailId"
